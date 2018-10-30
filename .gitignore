@@ -7,3 +7,6 @@ attachments/*
 config.json
 plugins/*
 log/
+
+template_findings.json
+
