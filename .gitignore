@@ -11,3 +11,5 @@ log/
 
 # For the Jetbrains squad
 .idea
+
+template_findings.json
