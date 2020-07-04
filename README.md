@@ -1,4 +1,9 @@
 # Serpico
+
+# April 9th, 2020 - Archiving...
+
+I am currently looking for a new home for Serpico. Until we find a new maintainer and/or company it will remain read only. Thank you so much for 7(!) years with this project. 
+
 ## SimplE RePort wrIting and CollaboratiOn tool
 Serpico is a penetration testing report generation and collaboration tool. It was developed to cut down on the amount of time it takes to write a penetration testing report.
 
@@ -8,53 +13,34 @@ Serpico is a penetration testing report generation and collaboration tool. It wa
 
 ## Installation
 
-The installation options are:
+Getting started in a few commands:
 
-* [Install Official Release](https://github.com/SerpicoProject/Serpico/releases): The prefered method of installation which includes all dependencies in one package.
+1. Create a working directory for Serpico and change to it:
+```
+mkdir SERPICO
+cd SERPICO
+```
+
+2. Pull down the newest version of Serpico:
+```
+docker run --name serpico -p 8443:8443 \
+  -v"$(pwd)/db":/Serpico/db -v"$(pwd)/tmp":/Serpico/tmp \
+  -v"$(pwd)/attachments":/Serpico/attachments \
+  -it serpico/serpico
+```
+
+3. Browse to https://127.0.0.1:8443 and start using it.
+
+
+More detailed information:
+
+* [Running Serpico From Docker](https://github.com/SerpicoProject/Serpico/wiki/Running-Serpico-From-Docker): The prefered method of installation. 
+
+* [Install Packaged Release](https://github.com/SerpicoProject/Serpico/releases): As of [v1.3.0](https://github.com/SerpicoProject/Serpico/releases/tag/1.3.0) (June 2018) we are no longer creating packaged builds.
 
 * [Developer Build](https://github.com/SerpicoProject/Serpico/wiki/Developer-Build): Simple Instructions to build from clone
 
-* [Windows Developer Build](https://github.com/SerpicoProject/Serpico/wiki/Windows-Installation): Serpico can also be built and run on Windows
-
-* [Running Serpico From Docker](https://github.com/SerpicoProject/Serpico/wiki/Running-Serpico-From-Docker) [NEEDS TO BE UPDATED]
-
-## Post-Installation Releases : Getting Started
-
-### Kali/Ubuntu/Debian
-
-Initialize the database:
-```
-/opt/Serpico/init_serpico.sh
-```
-
-And then start Serpico:
-```
-/opt/Serpico/start_serpico.sh
-```
-
-### OS X
-
-Initialize the database:
-```
-/Users/Shared/Serpico/init_serpico.sh
-```
-
-Start Serpico:
-```
-/Users/Shared/Serpico/start_serpico.sh
-```
-
-### Windows
-
-Initialize the database:
-```
-C:\Serpico\init_serpico.bat
-```
-
-Start Serpico:
-```
-C:\Serpico\start_serpico.bat
-```
+* [Windows Developer Build](https://github.com/SerpicoProject/Serpico/wiki/Windows-Installation): Building Serpico from source on Windows; Docker is the easiest installation method.
 
 ## About Serpico
 Serpico is at its core a report generation tool but targeted at creating information security reports. When building a report the user adds "findings" from the template database to the report. When there are enough findings, click 'Generate Report' to create the docx with your findings. The docx design comes from a Report Template which can be added through the UI; a default one is included. The Report Templates use a custom Markup Language to stub the data from the UI (i.e. findings, customer name, etc) and put them into the report.
@@ -87,5 +73,3 @@ See also:
 * [Issue](https://github.com/SerpicoProject/Serpico/issues/new) : If you have found a bug or would like a new feature
 * [E-mail Support](https://www.serpicoproject.com/support/): For teams of users or template related questions
 
-## GOTCHAS
-* Microsoft has a really annoying habit of changing a character for you. Always beware of this when working with the meta language

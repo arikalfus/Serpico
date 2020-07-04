@@ -14,7 +14,14 @@ class Server < Sinatra::Application
   set :config_options, config_options
   ## Global variables
   set :finding_types, config_options['finding_types']
-  set :assessment_types, ['External', 'Internal', 'Internal/External', 'Wireless', 'Web Application', 'DoS']
+
+  # set the report_assessment_types for <= 1.3.0 versions of Serpico
+  unless config_options['findings_assessment_types']
+    config_options['findings_assessment_types'] = ['External', 'Internal', 'Internal/External', 'Wireless', 'Web Application', 'DoS']
+  end
+  set :assessment_types, config_options['findings_assessment_types']
+  set :finding_states, config_options['finding_states']
+ 
   set :status, ['EXPLOITED']
   set :show_exceptions, config_options['show_exceptions']
 
@@ -92,11 +99,11 @@ class Server < Sinatra::Application
   # Risk Matrix
   set :severity, %w[Low Medium High]
   set :likelihood, %w[Low Medium High]
-  
+
   # NIST800
-  set :nist_likelihood, ['Low','Moderate','High']
-  set :nist_impact, ['Informational','Low','Moderate','High','Critical']
-  
+  set :nist_likelihood, ['Very Low','Low','Moderate','High','Very High']
+  set :nist_impact, ['Very Low','Low','Moderate','High','Very High']
+
   if config_options['cvssv2_scoring_override']
     if config_options['cvssv2_scoring_override'] == 'true'
       set :cvssv2_scoring_override, true
@@ -301,9 +308,9 @@ def image_insert(docx, rand_file, image, end_xml)
 
   # insert picture into xml, allow the user to ignore alignment if they want
   if settings.alignment == 'ignore'
-    docx << "<w:pict><v:shape id=\"myShape_#{p_id}\" type=\"#_x0000_t75\" style=\"width:#{width}; height:#{height}\"><v:imagedata r:id=\"#{p_id}\"/></v:shape></w:pict>"
+    docx << "<w:pict><v:shape id=\"myShape_#{p_id}\" type=\"#_x0000_t75\" style=\"width:#{width}; height:#{height}\"><v:imagedata r:id=\"#{p_id}\" o:title=\"\"/></v:shape></w:pict>"
   else
-    docx << "<w:p><w:pPr><w:jc w:val=\"#{imgAlign}\"/></w:pPr><w:pict><v:shape id=\"myShape_#{p_id}\" type=\"#_x0000_t75\" style=\"width:#{width}; height:#{height}\"><v:imagedata r:id=\"#{p_id}\"/></v:shape></w:pict></w:p>"
+    docx << "<w:p><w:pPr><w:jc w:val=\"#{imgAlign}\"/></w:pPr><w:pict><v:shape id=\"myShape_#{p_id}\" type=\"#_x0000_t75\" style=\"width:#{width}; height:#{height}\"><v:imagedata r:id=\"#{p_id}\" o:title=\"\"/></v:shape></w:pict></w:p>"
   end
   docx << end_xml
 

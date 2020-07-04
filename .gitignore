@@ -3,10 +3,13 @@ cert.pem
 key.pem
 tmp/*
 templates/*
+log/*.log
 attachments/*
 config.json
 plugins/*
 log/
 
-template_findings.json
+# For the Jetbrains squad
+.idea
 
+template_findings.json

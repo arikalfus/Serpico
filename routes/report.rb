@@ -29,6 +29,10 @@ get '/report/new' do
   @templates = Xslt.all
   @assessment_types = config_options['report_assessment_types']
   @languages = config_options['languages']
+
+  @admin = true if is_administrator?
+  @plugin = true if is_plugin?
+
   haml :new_report
 end
 
@@ -63,7 +67,19 @@ get '/report/:id/attachments' do
   findings.each do |find|
     next unless find.overview or find.poc or find.remediation or find.notes
 
-    text = find.overview + find.poc + find.remediation + find.notes
+    text = ""
+    if find.overview
+      text = text + find.overview
+    end
+    if find.poc
+      text = text + find.poc
+    end
+    if find.remediation
+      text = text + find.remediation
+    end
+    if find.notes
+      text = text + find.notes
+    end
 
     @screenshot_names_from_findings[find.id] = []
     # for each finding, we extract the screenshot name in the poc field.
@@ -418,6 +434,10 @@ get '/report/remove/:id' do
     # get all findings and udos associated with the report
     findings = Findings.all(report_id: id)
     udos = UserDefinedObjects.all(report_id: id)
+
+    # Notify the plugins that the report will be deleted
+    PluginNotifier.instance.notify_report_deleted(report)
+
     # delete the entries
     findings.destroy
     udos.destroy
@@ -554,6 +574,7 @@ get '/report/:id/udo/:udo_id/edit' do
   @udo_template = UserDefinedObjectTemplates.get(@udo_to_edit.template_id)
   @udo_template_properties = JSON.parse(@udo_template.udo_properties)
   @udo_to_edit_properties = JSON.parse(@udo_to_edit.udo_properties)
+
   haml :user_defined_object_edit
 end
 
@@ -943,6 +964,7 @@ get '/report/:id/findings/:finding_id/edit' do
 
   # Query for the first report matching the report_name
   @report = get_report(id)
+  @states = config_options['finding_states']
 
   return 'No Such Report' if @report.nil?
 
@@ -973,6 +995,7 @@ post '/report/:id/findings/:finding_id/edit' do
 
   # Query for the report
   @report = get_report(id)
+  @states = config_options['finding_states']
 
   return 'No Such Report' if @report.nil?
 
@@ -988,6 +1011,10 @@ post '/report/:id/findings/:finding_id/edit' do
   data = url_escape_hash(request.POST)
 
   data['title'] = data['title']
+
+  if @states
+      data['state'] =  @states.find_index(data['state'])
+  end
 
   if @report.scoring.casecmp('dread').zero?
     data['dread_total'] = data['damage'].to_i + data['reproducability'].to_i + data['exploitability'].to_i + data['affected_users'].to_i + data['discoverability'].to_i
@@ -1375,8 +1402,12 @@ get '/report/:id/generate' do
 
   end
   all_appendices_xml += "</appendices>\n"
+
+  # We notify all the plugins to get their output and add it to the report xml
+  plugins_xml = PluginNotifier.instance.notify_report_generated(@report)
+
   # we bring all xml together
-  report_xml = "<report>#{CGI.unescapeHTML(@report.to_xml)}#{udv}#{findings_xml}#{udo_xml}#{services_xml}#{hosts_xml}#{all_appendices_xml}</report>"
+  report_xml = "<report>#{CGI.unescapeHTML(@report.to_xml)}#{udv}#{findings_xml}#{udo_xml}#{services_xml}#{hosts_xml}#{all_appendices_xml}#{plugins_xml}</report>"
   noko_report_xml = Nokogiri::XML(report_xml)
   #no use to go on with report generation if report XML is malformed
   if !noko_report_xml.errors.empty?
